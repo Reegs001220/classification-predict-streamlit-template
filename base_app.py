@@ -24,6 +24,8 @@
 # Streamlit dependencies
 import streamlit as st
 import joblib,os
+from pathlib import Path
+import matplotlib as plt
 
 # Data dependencies
 import pandas as pd
@@ -34,6 +36,19 @@ tweet_cv = joblib.load(news_vectorizer) # loading your vectorizer from the pkl f
 
 # Load your raw data
 raw = pd.read_csv("resources/train.csv")
+
+#function for importing markdown files into the streamlit app
+def load_markdown_file(markdown_file):
+	"""
+	Reads the contents of a markdown file and returns the text as a string.
+
+	:param markdown_file: A string representing the path to the markdown file.
+	:type markdown_file: str
+	:return: A string containing the contents of the markdown file.
+	:rtype: str
+	"""
+	
+	return Path(markdown_file).read_text()
 
 # The main function where we will build the actual app
 def main():
@@ -53,7 +68,7 @@ def main():
 	if selection == "Information":
 		st.info("General Information")
 		# You can read a markdown file from supporting resources folder
-		st.markdown("Some information here")
+		st.markdown(load_markdown_file("resources/info.md"))
 
 		st.subheader("Raw Twitter data and label")
 		if st.checkbox('Show raw data'): # data is hidden if box is unchecked
@@ -76,7 +91,19 @@ def main():
 			# When model has successfully run, will print prediction
 			# You can use a dictionary or similar structure to make this output
 			# more human interpretable.
-			st.success("Text Categorized as: {}".format(prediction))
+
+			sentiment = 0
+
+			if prediction == -1:
+				sentiment = "Anti"
+			elif prediction == 0:
+				sentiment = "Neutral"
+			elif prediction == 1:
+				sentiment = "Pro"
+			elif prediction == 2:
+				sentiment = "News"
+
+			st.success("Text Categorized as: {}".format(sentiment))
 
 # Required to let Streamlit instantiate our web app.  
 if __name__ == '__main__':
