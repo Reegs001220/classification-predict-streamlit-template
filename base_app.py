@@ -265,10 +265,6 @@ def main(df):
 	if selection == "Prediction":
 		st.info("Prediction with ML Models")
 
-		#streamlit issue with if statements
-		predictors = ["Logistic Regression", "SGD Classifier", "Support Vector Classifier" ]
-		model = st.sidebar.selectbox("Choose A model", predictors)
-
 		# Creating a text box for user input
 		tweet_text = st.text_area("Enter Text","")
 
