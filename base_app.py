@@ -242,10 +242,14 @@ def main(df):
 		predictors = ["Logistic Regression", "SGD Classifier", "Support Vector Classifier" ]
 		model = st.sidebar.selectbox("Choose A model", predictors)
 
-	# Creates a main title and subheader on your page -
-	# these are static across all pages
-	st.title("Tweet Classifer")
-	st.subheader(f"Climate change tweet classification using {model}")
+		# Creates a main title and subheader on your page -
+		# these are static across all pages
+		st.title("Tweet Classifer")
+		st.subheader(f"Climate change tweet classification using {model}")
+
+	elif selection == "Information":
+		st.title("Tweet Classifer")
+		st.subheader("Climate change tweet classification using Machine Learning")
 
 	# Building out the "Information" page
 	if selection == "Information":
@@ -260,6 +264,11 @@ def main(df):
 	# Building out the predication page
 	if selection == "Prediction":
 		st.info("Prediction with ML Models")
+
+		#streamlit issue with if statements
+		predictors = ["Logistic Regression", "SGD Classifier", "Support Vector Classifier" ]
+		model = st.sidebar.selectbox("Choose A model", predictors)
+
 		# Creating a text box for user input
 		tweet_text = st.text_area("Enter Text","")
 
