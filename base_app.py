@@ -22,7 +22,6 @@
 
 """
 # Streamlit dependencies
-from sklearn.model_selection import train_test_split
 import streamlit as st
 import joblib,os
 from pathlib import Path
@@ -31,12 +30,8 @@ import matplotlib.pyplot as pyplt
 
 # Data dependencies
 import pandas as pd
-from sklearn.feature_extraction.text import HashingVectorizer
-from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
-from sklearn.utils import resample
-from sklearn.feature_extraction.text import TfidfVectorizer
 import nltk
 import re
 import time
@@ -202,28 +197,28 @@ def main(df):
 		# Replace all URLs with 'URL'
 		tweet = re.sub(r"((http://)[^ ]*|(https://)[^ ]*|( www\.)[^ ]*)", 'URL', tweet)
 
-		# Replace all emojis
+			# Replace all emojis
 		for emoji in emojis.keys():
 			tweet = tweet.replace(emoji, "EMOJI" + emojis[emoji])
 
-		# Replace @USERNAME with 'USER'
+			# Replace @USERNAME with 'USER'
 		tweet = re.sub(r'@[^\s]+', 'USER', tweet)
 
-		# Replace contractions
+			# Replace contractions
 		tweet = ' '.join([contractions[word] if word in contractions else word for word in tweet.split()])
 
-		#Remove consecutive duplicate characters
+			#Remove consecutive duplicate characters
 		tweet = re.sub(r"(.)\1+", r"\1", tweet)
 
-		# Replace all non-alphanumeric characters
+			# Replace all non-alphanumeric characters
 		tweet = re.sub(r"[^a-zA-Z0-9]", " ", tweet)
 
-		# Tokenize and lemmatize
+			# Tokenize and lemmatize
 		tokens = word_tokenize(tweet)
 		lemmatizer = WordNetLemmatizer()
 		lemmatized_words = [lemmatizer.lemmatize(word) for word in tokens]
 
-		# Update the 'message' column in the original DataFrame
+			# Update the 'message' column in the original DataFrame
 		row = ' '.join(lemmatized_words)
 
 		return row
@@ -234,10 +229,69 @@ def main(df):
 
 	# Creating sidebar with selection box -
 	# you can create multiple pages this way
-	options = ["Prediction", "Information"]
+	options = ["Home", "Let's Talk Data...", "Let's Classify!", "Give Me Some Insights...", "About the Models", ]
 	selection = st.sidebar.selectbox("Choose Option", options)
 
-	if selection == "Prediction":
+	if selection == "Home":
+		# Cover Page
+		st.title("SustainaMinds : Climate Change Tweet Classifier App")
+		st.image("resources/imgs/Team_logo.jpg", use_column_width=True)  # Replace with the path to your image
+		st.markdown(
+    """
+**Welcome to our Climate Change Tweet Classifier App!**
+
+*SustainaMinds Data Collective: Who are we?*
+
+- Reegan Rooke 
+- Ayanda Moloi
+- Kea Montshiwa
+- Mohau Khanye
+- Thabo Tladi
+- Thabani Dhladhla
+
+SustainaMinds Data Collective is a dynamic group committed to leveraging the power of data science for sustainable impact. With a focus on environmental consciousness,
+our collective explores innovative solutions, conducts data-driven research, and builds tools like this Climate Change Tweet Classifier App. We strive to bridge the gap 
+between data science and sustainability, fostering positive change and informed decision-making for a greener future.
+
+SustainaMinds Data Collective has developed this app as a powerful tool for exploring sentiments behind climate-related tweets.
+By leveraging our innovative platform and selecting from three top models, businesses can decipher whether a tweet supports, opposes, or falls in between the belief that 
+climate change is man-made and real.
+
+Unlock valuable insights into diverse perspectives shared on social media about the urgent matter of climate change.
+Businesses can use these insights to adapt and refine their marketing strategies, ensuring alignment with public sentiments and contributing to a more sustainable future.
+
+Join us in understanding and utilizing the wealth of information available through social media to make informed decisions and drive positive change!
+
+**Some things to know about the app:**
+
+- The app is divided into 5 sections: Home, Let's Talk Data..., Let's Classify!, Give Me Some Insights..., and About the Models.
+
+- The **Home** page is a brief introduction to the app and the SustainaMinds Data Collective.
+- The **Let's Talk Data...** page provides a brief overview of the data used to train the models as well as what each sentiment class represents. You can also select to see the raw data used.
+- The **Let's Classify!** page is where you can use the app to classify your own tweets.
+- The **Give Me Some Insights...** page provides some insights into the data that was discovered during the exploratory data analysis phase of the project.
+- The **About the Models** page provides a brief overview of the models used in the app.
+
+These sections can be accessed with the drop-down sidebar on the left of the app.
+    """
+)
+
+
+	elif selection == "Let's Talk Data...":
+		st.title("What Are We Working With?")
+		st.image("resources/imgs/notebook_head_image.jpg", use_column_width=True)
+
+		# Building out the "Information" page
+	if selection == "Let's Talk Data...":
+		# You can read a markdown file from supporting resources folder
+		st.markdown(load_markdown_file("resources/info.md"))
+
+		st.subheader("Raw Twitter data and label")
+		if st.checkbox('Show raw data'): # data is hidden if box is unchecked
+			st.write(raw[['sentiment', 'message']]) # will write the df to the page
+
+
+	elif selection == "Let's Classify!":
 		#give a list of models from the resources/pickles folder
 		predictors = ["Logistic Regression", "SGD Classifier", "Support Vector Classifier" ]
 		model = st.sidebar.selectbox("Choose A model", predictors)
@@ -247,23 +301,120 @@ def main(df):
 		st.title("Tweet Classifer")
 		st.subheader(f"Climate change tweet classification using {model}")
 
-	elif selection == "Information":
-		st.title("Tweet Classifer")
-		st.subheader("Climate change tweet classification using Machine Learning")
+	
 
-	# Building out the "Information" page
-	if selection == "Information":
-		st.info("General Information")
-		# You can read a markdown file from supporting resources folder
-		st.markdown(load_markdown_file("resources/info.md"))
+	elif selection == "Give Me Some Insights...":
+        # EDA Page
+		st.title("Exploratory Data Analysis: Visualizing the Data")
 
-		st.subheader("Raw Twitter data and label")
-		if st.checkbox('Show raw data'): # data is hidden if box is unchecked
-			st.write(raw[['sentiment', 'message']]) # will write the df to the page
+		st.markdown("Here you'll find graphical insights discovered during the exploratory data analysis phase of the project.")
+
+		# Add image paths for your EDA graphs
+		eda_image_path_1 = "resources/imgs/unbalanced_dist_pie.png"
+		eda_image_path_2 = "resources/imgs/distribution_of_sentiment_pie.png"
+		eda_image_path_3 = "resources/imgs/2_wordcloud.png"
+		eda_image_path_4 = "resources/imgs/1_wordcloud.png"
+		eda_image_path_5 = "resources/imgs/0_wordcloud.png"
+		eda_image_path_6 = "resources/imgs/-1_wordcloud.png"
+		eda_image_path_7 = "resources/imgs/2_hashtags.png"
+		eda_image_path_8 = "resources/imgs/1-hashtags.png"
+		eda_image_path_9 = "resources/imgs/0_hashtags.png"
+		eda_image_path_10 = "resources/imgs/-1_hashtags.png"
+
+		# Display the EDA images with headings and explanations
+		st.subheader("Graph 1 - Distribution of Sentiments When Unbalanced:")
+		st.image(eda_image_path_1, use_column_width=True)
+		st.markdown("""
+		   		This Pie chart shows the distribution of the raw data we had. As you can see a high majority of the data are 'Pro' tweets. 
+		   		This is a problem because the model will be biased towards predicting 'Pro' tweets. To solve this problem we downsampled the data 
+				to have an more equal distribution of the sentiments without sacrificing too much data.
+					""")
+
+		st.subheader("Graph 2 - Distribution of Sentiments When Downsampled:")
+		st.image(eda_image_path_2, use_column_width=True)
+		st.markdown("""
+		   		This Pie chart shows the distribution of the downsampled data. As you can see the data is now has a slightly better distribution, and we didnt lose
+			  too much data! 
+					""")
+		
+		st.subheader("Graph 3 - Wordcloud for Class 'FACT' :")
+		st.image(eda_image_path_3, use_column_width=True)
+		st.markdown("""
+		   		This wordcloud shows the most common words in the 'FACT' class. As you can see the most common word is 'https'. It seems that majority of the "FACT" tweets
+			  are links to articles. 
+					""")
+		
+		st.subheader("Graph 4 - Wordcloud for Class 'PRO' :")
+		st.image(eda_image_path_4, use_column_width=True)
+		st.markdown("""
+		   		This wordcloud shows the most common words in the 'PRO' class. 
+					""")
+		
+		st.subheader("Graph 5 - Wordcloud for Class 'NEUTRAL' :")
+		st.image(eda_image_path_5, use_column_width=True)
+		st.markdown("""
+		   		This wordcloud shows the most common words in the 'NEUTRAL' class.
+					""")
+		
+		st.subheader("Graph 7 - Top Hashtags and their Distributions for class 'FACT':")
+		st.image(eda_image_path_7, use_column_width=True)
+		st.markdown("""
+		   		This distibution plot shows the top 10 hashtags and their distributions for the 'FACT' class. 
+			  Interestingly, some of the most common Hashtags are related to political climate events. Such as #COP22, which is the
+			  2016 United Nations Climate Change Conference, an international meeting of political leaders and activists to discuss environmental issues. 
+					""")
+		
+		st.subheader("Graph 8 -  Top Hashtags and their Distributions for class 'PRO':")
+		st.image(eda_image_path_8, use_column_width=True)
+		st.markdown("""
+		   		This distibution plot shows the top 10 hashtags and their distributions for the 'PRO' class. There are also frequent mentions of political climate events, 
+			  such as #COP22 and #ParisAgreement.
+					""")
+		
+		st.subheader("Graph 9 - Top Hashtags and their Distributions for class 'NEUTRAL' :")
+		st.image(eda_image_path_9, use_column_width=True)
+		st.markdown("""
+		   		This distibution plot shows the top 10 hashtags and their distributions for the 'NEUTRAL' class.
+					""")
+		
+		st.subheader("Graph 10 - Top Hashtags and their Distributions for class 'ANTI' :")
+		st.image(eda_image_path_10, use_column_width=True)
+		st.markdown("""
+		   		This distibution plot shows the top 10 hashtags and their distributions for the 'ANTI' class. A standout hashtag to note is #ClimateScam and #OpChemtrails.
+			  These hashtags are associated with conspiracy theories that climate change is a hoax. #OPChemtrails is a hashtag used by conspiracy theorists to spread the idea that
+			  the government is using airplanes to spray chemicals into the air to control the weather.
+					""")
+	
+	elif selection == "About the Models":
+        # Model Info Page
+		st.title("How the Models Work")
+		st.image("resources/imgs/intro_image.webp", use_column_width=True)
+
+		st.markdown("""
+			  Here you'll find information about the models used in the app.
+
+			  - We have employed 3 choices of models for the app: Logistic Regression, SGD Classifier, and Support Vector Classifier.
+
+			  **Brief Brief Explanation of How These Models Work**:
+	
+			 **Support Vector Classifier (SVM):**
+			- *How it works:* SVM finds a hyperplane in a high-dimensional space that separates data into classes. It works well for both linear and non-linear classification.
+			- *Key Idea:* It focuses on finding the optimal boundary (hyperplane) that maximally separates different classes.
+			  
+			 **Logistic Regression:**
+			- *How it works:* Logistic Regression models the probability of an instance belonging to a particular class using a logistic function.
+			- *Key Idea:* It's a linear model that predicts the probability of binary or multi-class outcomes.
+			  
+			 **Stochastic Gradient Descent (SGD):**
+			- *How it works:* SGD optimizes a linear model by iteratively adjusting weights using a small random subset of the training data.
+			- *Key Idea:* It combines many weak models to create a strong predictive model.
+			  """)
+
+	
 
 	# Building out the predication page
-	if selection == "Prediction":
-		st.info("Prediction with ML Models")
+	if selection == "Let's Classify!":
+		st.info("Enter your tweet to classify:")
 
 		# Creating a text box for user input
 		tweet_text = st.text_area("Enter Text","")
@@ -318,27 +469,6 @@ def main(df):
 			with st.spinner('Wait for it...'):
 				time.sleep(1)
 			st.success("Text Categorized as: {}".format(sentiment))
-
-
-		dist_sentiment = pyplt.figure(figsize=(3,3), facecolor='none')
-		color = ("yellowgreen", "red", "gold", "pink")
-		wp = {'linewidth':2, 'edgecolor':"black"}
-		class_counts = downsampled_df['sentiment'].value_counts()
-		explode = (0.1,0.1,0.1,0.1)
-		class_counts.plot(kind='pie', autopct='%1.1f%%', shadow=True, colors=color, startangle=90, wedgeprops=wp, explode = explode , label='')
-		pyplt.title('Distribution Of Sentiments', fontsize=8)  # Change fontsize here
-
-		# Change fontsize of labels
-		pyplt.rc('font', size=8)  # controls default text sizes
-		pyplt.rc('axes', titlesize=8)  # fontsize of the axes title
-		pyplt.rc('axes', labelsize=8)  # fontsize of the x and y labels
-		pyplt.rc('xtick', labelsize=8)  # fontsize of the tick labels
-		pyplt.rc('ytick', labelsize=8)  # fontsize of the tick labels
-		pyplt.rc('legend', fontsize=8)  # legend fontsize
-		pyplt.rc('figure', titlesize=8)  # fontsize of the figure title
-
-		with st.expander("**See Distribution of Sentiments**"):
-			st.pyplot(dist_sentiment)
 
 # Required to let Streamlit instantiate our web app.  
 if __name__ == '__main__':

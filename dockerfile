@@ -1,4 +1,4 @@
-# Use an official Python runtime as a parent image
+# Use an official Python runtime as a parent image. Using the slim image to minimize space used due to ec2 constraints. bullseye is the latest version of debian a linux distribution.
 FROM python:slim-bullseye
 
 # Set the working directory in the container to /app
